@@ -1,0 +1,12 @@
+django
+djangorestframework
+django-cors-headers
+torch
+torchaudio
+numpy
+streamlit
+requests
+python-dotenv
+soundfile
+transformers
+chatterbox-tts
