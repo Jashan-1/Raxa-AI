@@ -10,3 +10,5 @@ python-dotenv
 soundfile
 transformers
 chatterbox-tts
+openai
+peft
