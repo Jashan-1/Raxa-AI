@@ -2,6 +2,10 @@
 
 Raxa-AI is an open-source, self-hosted application designed to assist YouTubers, podcast creators, and other content creators in generating audio for their content in multiple languages using their own cloned voice. This project leverages ChatterboxTTS for high-quality voice synthesis and OpenAI's GPT for intelligent script generation and translation, offering a completely free solution for multilingual audio creation.
 
+---
+![Screenshot 2025-06-07 at 3 23 07 AM](https://github.com/user-attachments/assets/d4aa9a50-35a7-4fb5-9910-37dddfb2c2ec)
+---
+
 ## 🚀 Key Features
 
 * **🎙️ Voice Cloning:** Upload your own voice sample (WAV, MP3, Opus, M4A) to clone your voice for personalized audio generation. The system handles automatic audio preprocessing and resampling.
@@ -239,6 +243,7 @@ If these ports are already in use on your system, you might need to modify them:
 
 - For the backend, change `0.0.0.0:8000` in the runserver command.
 - For the frontend, change `--server.port 8501` in the streamlit run command.
+- 
 
 ## ⭐ Show Your Support
 
