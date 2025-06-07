@@ -12,3 +12,7 @@ transformers
 chatterbox-tts
 openai
 peft
+psycopg2-binary>=2.9.9
+mozilla-django-oidc==4.0.1
+requests==2.32.3
+python-jose[cryptography]==3.3.0
