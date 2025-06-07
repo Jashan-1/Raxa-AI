@@ -3,7 +3,10 @@
 Raxa-AI is an open-source, self-hosted application designed to assist YouTubers, podcast creators, and other content creators in generating audio for their content in multiple languages using their own cloned voice. This project leverages ChatterboxTTS for high-quality voice synthesis and OpenAI's GPT for intelligent script generation and translation, offering a completely free solution for multilingual audio creation.
 
 ---
+![Screenshot 2025-06-08 at 2 12 55 AM](https://github.com/user-attachments/assets/adee2e3d-e2cc-4fcd-914a-4e4100bac633)
+---
 ![Screenshot 2025-06-07 at 3 23 07 AM](https://github.com/user-attachments/assets/d4aa9a50-35a7-4fb5-9910-37dddfb2c2ec)
+
 ---
 
 ## 🚀 Key Features
