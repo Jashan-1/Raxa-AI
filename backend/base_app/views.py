@@ -246,6 +246,7 @@
 
 # backend/base_app/views.py
 
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -284,7 +285,7 @@ def get_anonymous_user():
     return anonymous_user
 
 class VoiceCloneView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
     """
     API endpoint for uploading an audio file.
@@ -310,28 +311,74 @@ class VoiceCloneView(APIView):
             }
         }, status=status.HTTP_200_OK)
 
-class GenerateScriptView(APIView):
-    permission_classes = [AllowAny]
+# class GenerateScriptView(APIView):
+#     permission_classes = [IsAuthenticated]
     
-    """
-    API endpoint for generating and translating a script using OpenAI.
-    """
+#     """
+#     API endpoint for generating and translating a script using OpenAI.
+#     """
+#     def post(self, request, *args, **kwargs):
+#         data = request.data
+#         prompt = data.get("prompt")
+#         language = data.get("language", "English")
+
+#         if not prompt:
+#             return Response({"error": "Script prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if not prompt.strip():
+#             return Response({"error": "Script prompt cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             generated_script = generate_script_with_openai(prompt, language)
+#             # Log the interaction (user will be added after Okta setup)
+#             UserInteraction.objects.create(
+#                 user=request.user,  # ✅ Pass User instance
+#                 prompt=prompt,
+#                 language=language,
+#                 generated_script=generated_script,
+#                 audio_generated=False
+#             )
+#             return Response({
+#                 "script": generated_script,
+#                 "language": language,
+#                 "prompt": prompt,
+#                 "word_count": len(generated_script.split()),
+#                 "character_count": len(generated_script)
+#             }, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": f"Script generation failed: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class GenerateScriptView(APIView):
+    permission_classes = [IsAuthenticated] # Or [AllowAny] if you want it public
+    
     def post(self, request, *args, **kwargs):
         data = request.data
         prompt = data.get("prompt")
+        # ✅ Get all the new data from the frontend request
         language = data.get("language", "English")
+        content_type = data.get("contentType", "video") # Note the camelCase from frontend
+        tone = data.get("tone", "professional")
+        duration = data.get("duration", "short")
 
-        if not prompt:
-            return Response({"error": "Script prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not prompt.strip():
+        if not prompt or not prompt.strip():
             return Response({"error": "Script prompt cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            generated_script = generate_script_with_openai(prompt, language)
-            # Log the interaction (user will be added after Okta setup)
+            # ✅ Pass all the new parameters to the utility function
+            generated_script = generate_script_with_openai(
+                prompt, 
+                language, 
+                content_type, 
+                tone, 
+                duration
+            )
+            
+            # Log the interaction with the currently logged-in user
             UserInteraction.objects.create(
-                user=get_anonymous_user(),  # ✅ Pass User instance
+                user=request.user,
                 prompt=prompt,
                 language=language,
                 generated_script=generated_script,
@@ -347,8 +394,10 @@ class GenerateScriptView(APIView):
         except Exception as e:
             return Response({"error": f"Script generation failed: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
 class SpeakView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
     """
     API endpoint for generating audio from text using a previously uploaded voice.
@@ -387,7 +436,7 @@ class SpeakView(APIView):
             
             # Log the interaction
             UserInteraction.objects.create(
-                user=get_anonymous_user(),  # ✅ Use this instead of user_id=uuid.uuid4()
+                user=request.user, 
                 prompt=text,
                 language=language,
                 generated_script=text,
@@ -413,7 +462,7 @@ class SpeakView(APIView):
             return Response({"error": f"Audio generation failed: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CompleteWorkflowView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
     """
     API endpoint for the complete workflow: 
@@ -454,7 +503,7 @@ class CompleteWorkflowView(APIView):
             
             # Log the interaction
             UserInteraction.objects.create(
-                user=get_anonymous_user(),  # ✅ Use this instead of user_id=uuid.uuid4()
+                user=request.user, 
                 prompt=prompt,
                 language=language,
                 generated_script=generated_script,

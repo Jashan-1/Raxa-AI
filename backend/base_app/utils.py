@@ -298,39 +298,106 @@ LANGUAGE_CODES = {
     "Chinese": "zh"
 }
 
-def generate_script_with_openai(prompt: str, language: str) -> str:
+# def generate_script_with_openai(prompt: str, language: str) -> str:
+#     """
+#     Enhanced with transliteration support for non-English languages
+#     """
+#     if not openai.api_key:
+#         raise ValueError("OPENAI_API_KEY environment variable not set.")
+
+#     try:
+#         if language.lower() == "english":
+#             # Generate directly in English
+#             system_message = (
+#                 "You are a professional script writer. Generate a clear, engaging script for podcast or video content "
+#                 "based on the user's prompt. Make it natural-sounding and suitable for text-to-speech synthesis. "
+#                 "Keep sentences moderate in length and avoid complex punctuation that might confuse TTS systems. "
+#                 "Focus on creating content that flows well when spoken aloud. "
+#                 "Return ONLY the final script without any labels, headers, or explanations."
+#             )
+#             user_message = f"Generate a script based on this prompt: '{prompt}'."
+#         else:
+#             # Generate transliterated version for TTS compatibility
+#             system_message = (
+#                 f"You are a professional script writer. Generate a script for podcast or video content "
+#                 f"that represents {language} speech but written in English/Roman letters (transliterated). "
+#                 f"This means writing {language} words using English alphabet so they can be pronounced correctly by English TTS. "
+#                 f"For example: Hindi 'नमस्कार' becomes 'namaste', 'दोस्तों' becomes 'doston', etc. "
+#                 f"Make it natural-sounding and suitable for text-to-speech synthesis. "
+#                 f"Keep sentences moderate in length and use simple punctuation. "
+#                 f"The goal is that when an English TTS reads this, it sounds like natural {language} speech. "
+#                 f"Return ONLY the transliterated script without any labels, headers, or explanations."
+#             )
+#             user_message = (
+#                 f"Generate a script in {language} but write it using English/Roman letters (transliterated) "
+#                 f"based on this prompt: '{prompt}'. Make sure the transliteration sounds natural when spoken by English TTS."
+#             )
+
+#         response = openai.chat.completions.create(
+#             model="gpt-4o-mini",
+#             messages=[
+#                 {"role": "system", "content": system_message},
+#                 {"role": "user", "content": user_message},
+#             ],
+#             max_tokens=600,
+#             temperature=0.7
+#         )
+        
+#         script = response.choices[0].message.content.strip()
+        
+#         # Clean up any markdown or formatting
+#         script = script.replace("**", "").replace("*", "").replace("#", "")
+        
+#         # Remove any section headers that might have slipped through
+#         lines = script.split('\n')
+#         cleaned_lines = []
+        
+#         for line in lines:
+#             line = line.strip()
+#             if (line.lower().startswith(('script:', 'transliteration:', '---')) 
+#                 or line == '---' 
+#                 or not line):
+#                 continue
+#             cleaned_lines.append(line)
+        
+#         final_script = '\n'.join(cleaned_lines).strip()
+#         return final_script
+        
+#     except openai.APIError as e:
+#         raise Exception(f"OpenAI API error: {e}")
+#     except Exception as e:
+#         raise Exception(f"An unexpected error occurred during script generation: {e}")
+
+
+
+def generate_script_with_openai(prompt: str, language: str, content_type: str, tone: str, duration: str) -> str:
     """
-    Enhanced with transliteration support for non-English languages
+    ✅ ENHANCED to use content type, tone, and duration for more specific prompts.
     """
     if not openai.api_key:
         raise ValueError("OPENAI_API_KEY environment variable not set.")
 
     try:
+        # Create a more detailed system message using the new parameters
         if language.lower() == "english":
-            # Generate directly in English
             system_message = (
-                "You are a professional script writer. Generate a clear, engaging script for podcast or video content "
-                "based on the user's prompt. Make it natural-sounding and suitable for text-to-speech synthesis. "
-                "Keep sentences moderate in length and avoid complex punctuation that might confuse TTS systems. "
-                "Focus on creating content that flows well when spoken aloud. "
+                f"You are a professional script writer. Your task is to generate a script for a '{content_type}'. "
+                f"The script should have a '{tone}' tone and be of a '{duration}' duration. "
+                "Make it natural-sounding and suitable for text-to-speech. "
                 "Return ONLY the final script without any labels, headers, or explanations."
             )
-            user_message = f"Generate a script based on this prompt: '{prompt}'."
+            user_message = f"Generate the script based on this prompt: '{prompt}'."
         else:
-            # Generate transliterated version for TTS compatibility
             system_message = (
-                f"You are a professional script writer. Generate a script for podcast or video content "
-                f"that represents {language} speech but written in English/Roman letters (transliterated). "
-                f"This means writing {language} words using English alphabet so they can be pronounced correctly by English TTS. "
-                f"For example: Hindi 'नमस्कार' becomes 'namaste', 'दोस्तों' becomes 'doston', etc. "
-                f"Make it natural-sounding and suitable for text-to-speech synthesis. "
-                f"Keep sentences moderate in length and use simple punctuation. "
-                f"The goal is that when an English TTS reads this, it sounds like natural {language} speech. "
-                f"Return ONLY the transliterated script without any labels, headers, or explanations."
+                f"You are a professional script writer. Your task is to generate a script for a '{content_type}' in {language}, "
+                f"but written in English/Roman letters (transliterated for an English TTS). "
+                f"The script should have a '{tone}' tone and be of a '{duration}' duration. "
+                "The goal is that when an English TTS reads this, it sounds like natural {language} speech. "
+                "Return ONLY the transliterated script without any labels, headers, or explanations."
             )
             user_message = (
-                f"Generate a script in {language} but write it using English/Roman letters (transliterated) "
-                f"based on this prompt: '{prompt}'. Make sure the transliteration sounds natural when spoken by English TTS."
+                f"Generate a script in {language} (but written using English/Roman letters) "
+                f"based on this prompt: '{prompt}'. "
             )
 
         response = openai.chat.completions.create(
@@ -348,17 +415,8 @@ def generate_script_with_openai(prompt: str, language: str) -> str:
         # Clean up any markdown or formatting
         script = script.replace("**", "").replace("*", "").replace("#", "")
         
-        # Remove any section headers that might have slipped through
         lines = script.split('\n')
-        cleaned_lines = []
-        
-        for line in lines:
-            line = line.strip()
-            if (line.lower().startswith(('script:', 'transliteration:', '---')) 
-                or line == '---' 
-                or not line):
-                continue
-            cleaned_lines.append(line)
+        cleaned_lines = [line.strip() for line in lines if line.strip() and not line.lower().startswith(('script:', 'transliteration:'))]
         
         final_script = '\n'.join(cleaned_lines).strip()
         return final_script
@@ -378,8 +436,14 @@ def generate_complete_workflow(prompt: str, language: str, audio_file_bytes: byt
     Returns: (generated_script, audio_bytes)
     """
     try:
-        # Step 1: Generate and translate script
-        script = generate_script_with_openai(prompt, language)
+        # ✅ FIX: Provide default values for the new parameters when calling the script generation function.
+        script = generate_script_with_openai(
+            prompt=prompt, 
+            language=language,
+            content_type="video",  # Using a sensible default
+            tone="professional",   # Using a sensible default
+            duration="medium"      # Using a sensible default
+        )
         
         # Step 2: Generate audio with the translated script
         audio_bytes = generate_audio_with_chatterbox(

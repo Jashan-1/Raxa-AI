@@ -20,7 +20,10 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('base_app.urls')),  # Route to my app
+    # URLs for your main app
+    path('api/', include('base_app.urls')),
+    # URLs for authentication
+    path('api/auth/', include('users.urls')),
 ]
 
 
